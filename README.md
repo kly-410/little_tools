@@ -1,2 +1,2 @@
 # little_tools
-tools made by python
+python tools 
