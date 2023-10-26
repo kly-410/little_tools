@@ -8,12 +8,6 @@ import openpyxl
 import xlrd
 import os
 
-# sheet_name = "安环部预算执行表"
-
-# file = r"1、23年9月份管理费用预算执行表-安全环保部.xlsx"
-# # wb = openpyxl.load_workbook(file)   #加载
-
-# process_single_excel(file)
 
 def process_my_files(fold_path):
     flag =0
@@ -22,68 +16,25 @@ def process_my_files(fold_path):
         file_path = os.path.join(fold_path, file_name) #获取完整的文件路径
 
         if os.path.isfile(file_path):
-            print("开始处理文件：", file_path)
-            process_single_excel(file_path)
-            print("文件处理成功：", file_path)
+            print("开始处理文件：", file_name)
+
+            ret = process_single_excel(file_path)
+            if ret == -2:
+                print("已进行处理: 底稿>>>发送版")
+
+            print("success")
             print("************************************************")
 
         else:
             print("忽略文件夹:", file_name)
         flag += 1
-        print("已经第搞定%d个"% flag)
+        # print("已经第搞定%d个"% flag)
         
-    # print("提示：所有文件处理成功，底稿 》》》》发送版")
+    print("提示：所有文件处理成功，底稿>>>>发送版")
 
 
 print_log()
 process_my_files(FOLD_PATH)
-
-
-# def process_files(folder_path):
-#     # 获取文件夹中的所有文件名
-#     file_names = os.listdir(folder_path)
-    
-#     # 遍历每一个文件名
-#     for file_name in file_names:
-#         # 获取完整的文件路径
-#         file_path = os.path.join(folder_path, file_name)
-        
-#         # 判断是否为文件（而不是文件夹）
-#         if os.path.isfile(file_path):
-#             print("Processing file:", file_path)
-#             # 在这里添加处理文件的代码
-#             # ...
-#         else:
-#             print("Ignoring directory:", file_path)
-
-# # 调用函数，传入文件夹路径
-# process_files("F:/处理9月份表格/2_各部门分表")
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # file    = r'test1.xlsx'
-# file    = r'1、23年9月份管理费用预算执行表-安全环保部.xlsx'
-# sheet_name = "安环部预算执行表"
-# # sheet_name = "功率"
-# # sheet_name = "Sheet1"
-
-# wb = openpyxl.load_workbook(file,data_only=True)   #加载
-# copy_data_from_src(wb, sheet_name)
-# del_none_row_and_col(wb, sheet_name)
-# write_sum_to_xiaoji_row(wb, sheet_name)
-# wb.save(file)
-
-
 
 
 # 如果已经处理，就不处理了

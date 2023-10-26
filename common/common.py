@@ -147,7 +147,7 @@ def find_string_in_excel(file, sheetname, target_string, result_row_list, result
                 result_row_list.append(cell.row)
                 result_column_list.append(cell.column)
             # else:
-            #     print("查无此人：%s",target_string)
+                # print("查无此人：%s",target_string)
 
 
 
@@ -178,7 +178,7 @@ class SumExcel:
             if self.cachelist[i] == None:
                 self.cachelist[i] = 0  
             self.tmp += self.cachelist[i]
-        print("第%d列, %d-%d行的和为：%d" % (self.target, self.start, self.num + self.start, self.tmp))
+        # print("第%d列, %d-%d行的和为：%d" % (self.target, self.start, self.num + self.start, self.tmp))
         return self.tmp
 
     def return_row_sum(self):
@@ -187,7 +187,7 @@ class SumExcel:
             if self.cachelist[i] == None:
                 self.cachelist[i] = 0  
             self.tmp += self.cachelist[i]
-        print("第%d行, %d-%d列的和为：%d" % (self.target, self.start, self.num + self.start, self.tmp))
+        # print("第%d行, %d-%d列的和为：%d" % (self.target, self.start, self.num + self.start, self.tmp))
         return self.tmp
 
 
@@ -207,7 +207,11 @@ class GetSearchInExcel:
 
     def get_max_column(self):
         find_string_in_excel(self.wb, self.sheet_name, self.str , self.row_val_list, self.column_val_list)
-        return self.column_val_list[-1]
+        if len(self.column_val_list) != 0:
+            return self.column_val_list[-1]
+        else:
+            print("提示：已经过p2处理")#已经没有最大行flag, 
+
 
 
 
@@ -221,15 +225,18 @@ def del_none_row_and_col(wb, sheet_name):
     maxrow = GetSearchInExcel(wb, sheet_name, "合计")
     maxrow_num = maxrow.get_max_row()
     maxcol = GetSearchInExcel(wb, sheet_name, "1-12月合计")
-    maxcol_num = maxcol.get_max_column() +3  #由表格获得,+3是多删除一点空白列
-    print("最大列：", maxcol_num)
+    if None == maxcol.get_max_column():
+        return -1
+    else:
+        maxcol_num = maxcol.get_max_column() +3  #由表格获得,+3是多删除一点空白列
+    # print("最大列：", maxcol_num)
 
 
     find_string_in_excel(wb, sheet_name, "本月预算", row_val_list, column_val_list)
-    print("基地址(本月预算)：行_%d,列_%d" %(row_val_list[0],column_val_list[0]))
+    # print("基地址(本月预算)：行_%d,列_%d" %(row_val_list[0],column_val_list[0]))
 
     find_string_in_excel(wb, sheet_name, "累计费用", row_val_list, column_val_list)
-    print("基地址(累计费用)：行_%d,列_%d" %(row_val_list[1],column_val_list[1]))
+    # print("基地址(累计费用)：行_%d,列_%d" %(row_val_list[1],column_val_list[1]))
 
 
     #获取坐标
@@ -360,7 +367,7 @@ def copy_data_from_src(wb, sheet_name):
     systime = SysTime()
     month = systime.month
     now = systime.now
-    print("现在是%d月，进行%d月表格处理" %(month, (int(month) - 1)))
+    # print("现在是%d月，进行%d月表格处理" %(month, (int(month) - 1)))
 
     maxrow = GetSearchInExcel(wb, sheet_name, "合计")
     maxrow_num = maxrow.get_max_row()
@@ -422,7 +429,9 @@ def process_single_excel(file):
     
     wb = openpyxl.load_workbook(file,data_only=True)   #加载
     copy_data_from_src(wb, sheet_name)
-    del_none_row_and_col(wb, sheet_name)
+    ret = del_none_row_and_col(wb, sheet_name)
+    if ret == -1:
+        return -2
     write_sum_to_xiaoji_row(wb, sheet_name)
     wb.save(file)
 
