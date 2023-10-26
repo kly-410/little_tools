@@ -3,6 +3,8 @@ import openpyxl
 import datetime
 import xlrd
 from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
+from common.style import*
 
 # """
 # 按sheet number 写
@@ -421,6 +423,22 @@ def have_processed_check1(file, sheet_name):
 
 
 
+def unfreeze_and_unfilt_cell(wb, sheetname):
+    work_sheet = wb[sheetname]
+    work_sheet.freeze_panes = None
+    work_sheet.auto_filter.ref = None
+
+
+
+
+
+
+
+
+
+
+
+
 def process_single_excel(file):
     sheet_name = "安环部预算执行表"
     # tmp = have_processed_check1(file, sheet_name)
@@ -429,10 +447,20 @@ def process_single_excel(file):
     
     wb = openpyxl.load_workbook(file,data_only=True)   #加载
     copy_data_from_src(wb, sheet_name)
+
+
+
     ret = del_none_row_and_col(wb, sheet_name)
     if ret == -1:
         return -2
+    
+
     write_sum_to_xiaoji_row(wb, sheet_name)
+
+    unfreeze_and_unfilt_cell(wb, sheet_name)
+
+    # set_color_of_sheet(wb, sheet_name)
+
     wb.save(file)
 
 def print_log():
