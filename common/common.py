@@ -4,7 +4,21 @@ import datetime
 import xlrd
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
-from common.style import*
+from common.style import *
+import inspect
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+
+MAXROW = None
+
+def dprint(msg):
+    frame_info = inspect.stack()[1]
+    file_name = frame_info[1]
+    line_number = frame_info[2]
+    function_name = frame_info[3]
+    print_msg = f"[print>>>>> line:{line_number} fuction:{function_name}] {msg}"
+    # print_msg = f"[print]line_{line_number}_fuction_{function_name}_{file_name}] {msg}"
+    dprint(print_msg)
 
 # """
 # 按sheet number 写
@@ -325,11 +339,13 @@ def write_sum_to_xiaoji_row(wb, sheet_name):
     maxrow = GetSearchInExcel(wb, sheet_name, "合计")
     maxrow_num = maxrow.get_max_row()
 
+
     find_string_in_excel(wb, sheet_name, "本月预算", row_base_addr_list, column_base_addr_list)
     # print("基地址(本月预算)：行_%d,列_%d" %(row_base_addr_list[0],column_base_addr_list[0]))
     col_base_start = column_base_addr_list[0]
 
     for column in range(col_base_start,col_base_start + 5):
+    # column = 3
         row_start = row_base_addr_list[0] +1
         row_end = None
         for i in range(row_base_addr_list[0] +1, maxrow_num):
@@ -337,6 +353,7 @@ def write_sum_to_xiaoji_row(wb, sheet_name):
             if tmp1 == "小计":
                 # print(i)
                 row_end = i - 1
+                # print("[%d - %d]"%(row_start,row_end))
                 value = "=sum(" + str(list_ABC[0][str(column)]) + str(row_start) + ":" + str(list_ABC[0][str(column)]) + str(row_end) +")"
                 # print(value)
                 work_sheet.cell(i,column,value)
@@ -344,7 +361,7 @@ def write_sum_to_xiaoji_row(wb, sheet_name):
             if tmp1 == "图书杂志费":
                 row_start += 1
 
-    #获取小记所在行,并完成每一列小计的合计
+    #获取小记所在行,
     for i in range(row_base_addr_list[0] +1, maxrow_num):
         tmp1 = work_sheet.cell(i, column_base_addr_list[0] - 1).value
         if tmp1 == "小计":
@@ -353,15 +370,16 @@ def write_sum_to_xiaoji_row(wb, sheet_name):
             xioaji_and_tushu_row_list.append(i)   
     # print(xioaji_and_tushu_row_list)
 
-    #写入合计
+    # #写入合计
     for column in range(col_base_start,col_base_start + 5 ):
         # print("column:",column)
+    # column = 3
         str_to_write = "="
         for i in range(len(xioaji_and_tushu_row_list)):
             str_to_write += "+" + str(list_ABC[0][str(column)]) + str(xioaji_and_tushu_row_list[i])
         # print(str_to_write)
         work_sheet.cell(maxrow_num,column,str_to_write)
-    # print("合计成功！")
+    print("合计成功！")
 
 
 def copy_data_from_src(wb, sheet_name):
@@ -429,6 +447,143 @@ def unfreeze_and_unfilt_cell(wb, sheetname):
     work_sheet.auto_filter.ref = None
 
 
+def merge_cells_value(wb, sheetname=None, range_string=None, start_row=None, start_column=None, end_row=None, end_column=None):
+    """
+        将靠上靠左的单元格的value赋值给合并后的单元格
+    """
+    sheet = wb[sheetname]
+    if start_row > end_row:
+        fmt = "{end_row} must be greater than {start_row}"
+        raise ValueError(fmt.format(start_row=start_row, end_row=end_row))
+    if start_column > end_column:
+        fmt = "{end_column} must be greater than {start_column}"
+        raise ValueError(fmt.format(start_column=start_column, end_column=end_column))
+    if range_string is None:
+        fmt = '{start_column}{start_row}:{end_column}{end_row}'
+        range_string = fmt.format(start_row=start_row,
+                                  start_column=get_column_letter(start_column),
+                                  end_row=end_row,
+                                  end_column=get_column_letter(end_column))
+
+    v = None
+    for cells in sheet[range_string]:
+        for cell in cells:
+            if cell.value is not None:
+                v = cell.value
+                break
+        if v is not None:
+            break
+    # print(range_string)
+    sheet.merge_cells(range_string=range_string)
+    sheet['{0}{1}'.format(get_column_letter(start_column), str(start_row))] = v
+# 使用方式
+
+def unmerge_cells_value(wb, sheetname=None, range_string=None, start_row=None, start_column=None, end_row=None, end_column=None):
+    """
+        将靠上靠左的单元格的value赋值给合并后的单元格
+    """
+    sheet = wb[sheetname]
+    if start_row > end_row:
+        fmt = "{end_row} must be greater than {start_row}"
+        raise ValueError(fmt.format(start_row=start_row, end_row=end_row))
+    if start_column > end_column:
+        fmt = "{end_column} must be greater than {start_column}"
+        raise ValueError(fmt.format(start_column=start_column, end_column=end_column))
+    if range_string is None:
+        fmt = '{start_column}{start_row}:{end_column}{end_row}'
+        range_string = fmt.format(start_row=start_row,
+                                  start_column=get_column_letter(start_column),
+                                  end_row=end_row,
+                                  end_column=get_column_letter(end_column))
+    # print(range_string)
+    sheet.unmerge_cells(range_string=range_string)
+
+
+
+
+
+
+def unmerge_my_cell(wb, sheet_name):
+
+    work_sheet = wb[sheet_name]
+    row_base_addr_list = []
+    column_base_addr_list = []
+    xioaji_and_tushu_row_list = []
+
+    maxrow = GetSearchInExcel(wb, sheet_name, "合计")
+    maxrow_num = maxrow.get_max_row()
+
+    find_string_in_excel(wb, sheet_name, "本月预算", row_base_addr_list, column_base_addr_list)
+    # print("基地址(本月预算)：行_%d,列_%d" %(row_base_addr_list[0],column_base_addr_list[0]))
+    col_base_start = column_base_addr_list[0]
+
+
+    row_start = row_base_addr_list[0] +1
+    row_end = None
+    for i in range(row_base_addr_list[0] +1, maxrow_num):
+        # print(row_start)
+        tmp1 = work_sheet.cell(i, column_base_addr_list[0] - 1).value
+        if tmp1 == None:
+            break
+        if tmp1 == "小计":
+            if i == maxrow_num:
+                break
+            if row_start == i  and row_start != 6:
+                pass
+
+            else:
+                # print("[%d-%d]"%(row_start, i))
+                unmerge_cells_value(wb, sheetname=sheet_name, range_string=None, start_row=row_start, start_column=1, end_row=i, end_column = 1)
+
+                value = read_from_excel_cell(wb, sheet_name, row_start, 1) #获取大类费用名称
+                # print("第%d行的值:%s" %(row_start, value))
+                for ummerge_i in range(row_start + 1,i+1):
+                    # print("unmerge_i=",ummerge_i)
+                    work_sheet.cell(ummerge_i,1,value)
+                    
+            
+            # print("[%d-%d]"%(row_start, i))
+            row_start = i + 1
+        if tmp1 == "图书杂志费":
+            row_start = i + 1
+
+
+
+        # if tmp1 == "图书杂志费":
+        #     row_start += 1
+
+
+
+
+def merge_my_cell(wb, sheet_name):
+
+    work_sheet = wb[sheet_name]
+    row_base_addr_list = []
+    column_base_addr_list = []
+    xioaji_and_tushu_row_list = []
+
+    maxrow = GetSearchInExcel(wb, sheet_name, "合计")
+    maxrow_num = maxrow.get_max_row()
+
+    find_string_in_excel(wb, sheet_name, "本月预算", row_base_addr_list, column_base_addr_list)
+    # print("基地址(本月预算)：行_%d,列_%d" %(row_base_addr_list[0],column_base_addr_list[0]))
+    col_base_start = column_base_addr_list[0]
+    row_start = row_base_addr_list[0] +1
+
+
+
+    # merge_cells_value(wb, sheetname=sheet_name, range_string=None, start_row=6, start_column=1, end_row=11, end_column=1)
+    # merge_cells_value(wb, sheetname=sheet_name, range_string=None, start_row=12, start_column=1, end_row=14, end_column=1)
+    for i in range(row_base_addr_list[0]+1, maxrow_num):
+        # print("开始：%d结束：%d"%(row_base_addr_list[0]+1, maxrow_num))
+        tmp1 = work_sheet.cell(i, column_base_addr_list[0] - 1).value
+        if tmp1 == "小计":
+            row_end = i
+            merge_cells_value(wb, sheetname=sheet_name, range_string=None, start_row=row_start, start_column=1, end_row=row_end, end_column=1)
+            row_start = i + 1
+        if tmp1 == "图书杂志费":
+            row_start = i + 1
+        
 
 
 
@@ -440,12 +595,18 @@ def unfreeze_and_unfilt_cell(wb, sheetname):
 
 
 def process_single_excel(file):
-    sheet_name = "安环部预算执行表"
+    # sheet_name = "安环部预算执行表"
     # tmp = have_processed_check1(file, sheet_name)
     # if tmp == -1:
     #     return
+    sheet_list = []
     
     wb = openpyxl.load_workbook(file,data_only=True)   #加载
+    sheet_list= wb.sheetnames
+    sheet_name = sheet_list[0]
+
+    unmerge_my_cell(wb, sheet_name)
+
     copy_data_from_src(wb, sheet_name)
 
 
@@ -456,10 +617,11 @@ def process_single_excel(file):
     
 
     write_sum_to_xiaoji_row(wb, sheet_name)
+    merge_my_cell(wb, sheet_name) #TODO
 
     unfreeze_and_unfilt_cell(wb, sheet_name)
 
-    # set_color_of_sheet(wb, sheet_name)
+    # # # set_color_of_sheet(wb, sheet_name)#TODO
 
     wb.save(file)
 
@@ -470,10 +632,12 @@ def print_log():
     print("| |_| | |_| \__ \ || (_| | |  | |_ ")
     print(" \__,_|\__,_|___/\__\__,_|_|   \__|")
 
+"""从原始表格里获取数据存放在list中"""
 
 
 
-
+def get_data_from_orgin_to_draft():
+    
 
 
 

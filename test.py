@@ -2,17 +2,17 @@
 #!/usr/bin/env python3
 # import common
 from common.common import *
+from common.style import *
 import common.common
 from config.config import *
 import openpyxl
 import xlrd
 import os
 
-# file = r"6、23年9月份管理费快乐部门.xlsx"
+# file = r"1、23年9月份管理费用预算执行表-安全环保部.xlsx"
 # sheetname="安环部预算执行表"
 # wb = openpyxl.load_workbook(file,data_only=True)   #加载
-# set_cell_color(wb, sheetname,5, 3, 1)
-# set_row_color(wb, sheetname, 5, 3, 6, 1)
+
 
 def process_my_files(fold_path):
     flag =0
@@ -42,33 +42,6 @@ print_log()
 process_my_files(FOLD_PATH)
 
 
-
-# 在Python中，可以使用openpyxl库来操作Excel文件。要合并和拆分指定行列的单元格，可以使用openpyxl中的merge_cells()和unmerge_cells()方法。
-
-# 合并单元格的方法是使用merge_cells()方法，该方法接受一个参数，即要合并的单元格范围。例如，要合并第1行到第3行，第1列到第2列的单元格，可以使用以下代码：
-
- 
-# from openpyxl import Workbook
-
-# wb = Workbook()
-# ws = wb.active
-
-# # 合并单元格
-# ws.merge_cells(start_row=1, end_row=3, start_column=1, end_column=2)
-
-# wb.save("merged_cells.xlsx")
-# 拆分单元格的方法是使用unmerge_cells()方法，该方法接受一个参数，即要拆分的单元格范围。例如，要拆分第1行到第3行，第1列到第2列的单元格，可以使用以下代码：
-
- 
-# from openpyxl import load_workbook
-
-# wb = load_workbook("merged_cells.xlsx")
-# ws = wb.active
-
-# # 拆分单元格
-# ws.unmerge_cells(start_row=1, end_row=3, start_column=1, end_column=2)
-
-# wb.save("unmerged_cells.xlsx")
 
 
 
