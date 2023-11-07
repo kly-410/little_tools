@@ -14,6 +14,13 @@ import os
 # wb = openpyxl.load_workbook(file,data_only=True)   #加载
 
 
+
+
+
+
+
+
+
 def process_my_files(fold_path):
     flag =0
     file_names = os.listdir(fold_path)
@@ -64,28 +71,9 @@ process_my_files(FOLD_PATH)
 
 
 
-# 1. python修改单元格的值，公式会自动计算
-# 2. 读取公式，会读回来公式的表达式，而不是公式计算的值
-# 3. 获取字符串在单元格的坐标
 
 
 
-# row_read_from_excel(file, sheet_name, 1, 1, 3, row_val_list)
-# column_read_from_excel(file, sheet_name, 1, 1, 3, cachelist)
-
-
-
-
-
-
-
-# for i in range(len(row_val_list)):
-#     print(row_val_list[i])#打印单元格的值
-
-
-
-# for i in range(len(cachelist)):
-#     print(cachelist[i])#打印单元格的值
 
 
 

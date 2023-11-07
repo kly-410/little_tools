@@ -588,12 +588,6 @@ def merge_my_cell(wb, sheet_name):
 
 
 
-
-
-
-
-
-
 def process_single_excel(file):
     # sheet_name = "安环部预算执行表"
     # tmp = have_processed_check1(file, sheet_name)
